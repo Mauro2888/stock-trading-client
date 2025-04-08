@@ -1,9 +1,5 @@
-package com.stock.trading.stocktradingclient;
+package com.stock.trading.client;
 
-import com.stock.trading.service.inbound.StockProtoRequest;
-import com.stock.trading.service.inbound.StockTradingFindServiceGrpc;
-import net.devh.boot.grpc.client.inject.GrpcClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

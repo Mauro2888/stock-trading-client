@@ -1,4 +1,4 @@
-package com.stock.trading.stocktradingclient;
+package com.stock.trading.client;
 
 import com.stock.trading.service.inbound.StockProtoRequest;
 import com.stock.trading.service.inbound.StockProtoResponse;

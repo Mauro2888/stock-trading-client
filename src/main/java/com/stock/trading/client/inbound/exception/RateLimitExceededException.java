@@ -1,7 +1,7 @@
 package com.stock.trading.client.inbound.exception;
 
-public class RateLimitExceedException extends RuntimeException {
-    public RateLimitExceedException(String message) {
+public class RateLimitExceededException extends RuntimeException {
+    public RateLimitExceededException(String message) {
         super(message);
     }
 }

@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Component
@@ -42,28 +43,37 @@ public class RateLimiterInterceptor {
         var currentRequests = redisTemplate.opsForValue().increment(key, 1);
         if (nonNull(currentRequests) && currentRequests == 1) {
             redisTemplate.expire(key, duration, TimeUnit.SECONDS);
-            log.info(()-> "Expiring key %s for %s seconds".formatted(key, duration));
+            log.info(() -> "Expiring key %s for %s seconds".formatted(key, duration));
+        }
+
+        // Get TTL for headers
+        Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        if (isNull(ttl) || ttl < 0) {
+            ttl = duration; // Default if TTL couldn't be determined
         }
 
         if (nonNull(currentRequests) && currentRequests > requests) {
-            log.warning(()-> "Rate limit exceeded for key %s: %d requests in %d seconds".formatted(key, currentRequests, duration));
+            log.warning(() -> "Rate limit exceeded for key %s: %d requests in %d seconds".formatted(key, currentRequests, duration));
             var response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
             if (response != null) {
                 // Add standard rate limiting headers
                 response.setHeader("X-RateLimit-Limit", String.valueOf(requests));
                 response.setHeader("X-RateLimit-Remaining", "0");
-
-                // Get remaining time to reset
-                Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
-                if (ttl != null && ttl > 0) {
-                    response.setHeader("X-RateLimit-Reset", String.valueOf(ttl));
-                    // RFC compliant Retry-After header in seconds
-                    response.setHeader("Retry-After", String.valueOf(ttl));
-                }
+                response.setHeader("X-RateLimit-Reset", String.valueOf(ttl));
+                response.setHeader("Retry-After", String.valueOf(ttl));
             }
 
             throw new RateLimitExceededException("Rate limit exceeded");
         }
+
+        // Add headers for successful requests too
+        var response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
+        if (response != null) {
+            response.setHeader("X-RateLimit-Limit", String.valueOf(requests));
+            response.setHeader("X-RateLimit-Remaining", String.valueOf(requests - currentRequests));
+            response.setHeader("X-RateLimit-Reset", String.valueOf(ttl));
+        }
+
         return joinPoint.proceed();
     }
 }

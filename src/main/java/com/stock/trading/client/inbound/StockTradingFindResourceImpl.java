@@ -1,5 +1,6 @@
 package com.stock.trading.client.inbound;
 
+import com.stock.trading.client.inbound.rate.RateLimiter;
 import com.stock.trading.client.vm.StockResponse;
 import com.stock.trading.client.vm.api.StockTradingFind;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class StockTradingFindResourceImpl implements StockTradingFind {
         this.delegate = delegate;
     }
 
+    @RateLimiter(requests = 2, duration = 10)
     @GetMapping
     @Override
     public StockResponse find(String symbol) {

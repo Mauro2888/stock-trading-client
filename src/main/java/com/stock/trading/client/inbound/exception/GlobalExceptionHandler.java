@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         log.warning(() -> "Rate limit exceeded: %s".formatted(ex.getMessage()));
         return ResponseEntity
                 .status(HttpStatus.TOO_MANY_REQUESTS.value())
-                .body(new JsonError("RATE_LIMIT_EXCEEDED", ex.getMessage()));
+                .body(new JsonError(HttpStatus.TOO_MANY_REQUESTS.name(), ex.getMessage()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         log.warning(() -> "Resource not found: %s".formatted(ex.getMessage()));
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND.value())
-                .body(new JsonError("RESOURCE_NOT_FOUND", ex.getMessage()));
+                .body(new JsonError(HttpStatus.NOT_FOUND.name(), ex.getMessage()));
     }
 
 
@@ -43,10 +43,10 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-    @ExceptionHandler({Exception.class})
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex) {
         log.log(Level.SEVERE, "An unexpected error occurred", ex);
-        var errorResponse = new JsonError("INTERNAL_ERROR", "An unexpected error occurred");
+        var errorResponse = new JsonError(HttpStatus.INTERNAL_SERVER_ERROR.name(), "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(errorResponse);
     }

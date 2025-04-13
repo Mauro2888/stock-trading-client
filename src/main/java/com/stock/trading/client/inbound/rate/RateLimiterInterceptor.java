@@ -2,6 +2,7 @@ package com.stock.trading.client.inbound.rate;
 
 import com.stock.trading.client.inbound.exception.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -27,7 +28,8 @@ public class RateLimiterInterceptor {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    public RateLimiterInterceptor(HttpServletRequest httpServletRequest, RedisTemplate<String, Object> redisTemplate) {
+    public RateLimiterInterceptor(HttpServletRequest httpServletRequest,
+                                  RedisTemplate<String, Object> redisTemplate) {
         this.httpServletRequest = httpServletRequest;
         this.redisTemplate = redisTemplate;
     }

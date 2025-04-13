@@ -1,10 +1,15 @@
 package com.stock.trading.client.vm;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 
-public record StockResponse(String name, String symbol, BigDecimal price) {
+@Schema(description = "Stock response")
+public record StockResponse(
+        @Schema(example = "Apple") String name,
+        @Schema(example = "AAPL") String symbol,
+        BigDecimal price) {
 
     public static class Builder {
         private String name;
